@@ -3,6 +3,9 @@ from .locators import ProductPageLocators
 
 class ProductPage(BasePage):
     
+    def success_message_should_have_disappeared(self):
+        assert self.is_disappeared(*ProductPageLocators.SUCCESS_MESSAGE)
+    
     def should_be_add_product_button(self):
         return self.is_element_present(*ProductPageLocators.ADD_TO_CART_BUTTON)
     
@@ -24,3 +27,17 @@ class ProductPage(BasePage):
     
     def should_not_be_success_message(self):
         return self.is_not_element_present(*ProductPageLocators.SUCCESS_MESSAGE)
+    
+    def should_be_success_message(self):
+        return self.is_element_present(*ProductPageLocators.SUCCESS_MESSAGE)
+    
+    def product_price_should_match_added_price(self):
+        added_price = self.get_product_price()
+        cart_total = self.get_cart_total()
+        assert added_price == cart_total, "Product price in cart is incorrect"
+        
+    def product_name_should_match_name_in_notification(self):
+        product_name_notif = self.get_added_product_name_in_notification()
+        product_name = self.get_product_name()
+        assert product_name_notif == product_name, "Product name in notification is incorrect"
+        
