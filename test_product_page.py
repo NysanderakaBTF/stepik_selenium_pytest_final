@@ -12,31 +12,7 @@ def test_user_should_see_add_to_cart_button(browser):
     page.open()
     assert page.should_be_add_product_button(), "No add to cart button"
     
-@pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer3",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer4",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer5",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer6",
-                                  pytest.param("http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer7", marks=pytest.mark.xfail),
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"])
-def test_add_to_cart_button(browser, link):
-    page = ProductPage(browser, link)
-    page.open()
-    page.add_product_to_basket()
-    page.solve_quiz_and_get_code()
-    product_name_notif = page.get_added_product_name_in_notification()
-    product_name = page.get_product_name()
-    assert product_name_notif == product_name, "Product name in notification is incorrect"
-    
-    product_price = page.get_product_price()
-    price_in_cart = page.get_cart_total()
-    
-    assert product_price == price_in_cart, "Product price in cart is incorrect"
-    
-    assert page.is_element_present(*ProductPageLocators.SUCCESS_MESSAGE), "No success message after adding to cart"
+
     
 def test_guest_cant_see_success_message_after_adding_product_to_basket(browser):
     link = 'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/'
@@ -45,11 +21,6 @@ def test_guest_cant_see_success_message_after_adding_product_to_basket(browser):
     page.add_product_to_basket()
     assert page.is_not_element_present(*ProductPageLocators.SUCCESS_MESSAGE)
     
-def test_guest_cant_see_success_message(browser):
-    link = 'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/'
-    page = ProductPage(browser, link)
-    page.open()
-    assert page.is_not_element_present(*ProductPageLocators.SUCCESS_MESSAGE)
     
 def test_message_disappeared_after_adding_product_to_basket(browser):
     link = 'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/'
@@ -81,3 +52,37 @@ def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     basket_page = BasketPage(browser, browser.current_url)
     assert len(basket_page.get_list_of_items()) == 0, "Basket is not empty"
     assert basket_page.is_element_present(*BasketPageLocators.EMPTY_BASKET_MESSAGE)
+    
+
+class TestUserAddToBasketFromProductPage:
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        self.email = str(time.time()) + "@fakemail.org"
+        self.password = str(time.time())
+        page = LoginPage(browser, 'https://selenium1py.pythonanywhere.com/ru/accounts/login/')
+        page.open()
+        page.register_new_user(self.email, self.password)
+        page.should_be_authorized_user()
+        
+    def test_user_can_add_product_to_basket(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2"
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_product_to_basket()
+        page.solve_quiz_and_get_code()
+        product_name_notif = page.get_added_product_name_in_notification()
+        product_name = page.get_product_name()
+        assert product_name_notif == product_name, "Product name in notification is incorrect"
+        
+        product_price = page.get_product_price()
+        price_in_cart = page.get_cart_total()
+        
+        assert product_price == price_in_cart, "Product price in cart is incorrect"
+        
+        assert page.is_element_present(*ProductPageLocators.SUCCESS_MESSAGE), "No success message after adding to cart"
+    
+    def test_user_cant_see_success_message(self, browser):
+        link = 'http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/'
+        page = ProductPage(browser, link)
+        page.open()
+        assert page.is_not_element_present(*ProductPageLocators.SUCCESS_MESSAGE)
