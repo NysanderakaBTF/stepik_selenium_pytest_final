@@ -47,6 +47,13 @@ class BasePage:
 
         return True
     
+    def should_be_basket_button(self):
+        assert self.is_element_present(*BasePageLocators.BASKET_BUTTON), "Basket button is not presented"
+        
+    def go_to_basket_page(self):
+        basket_button = self.browser.find_element(*BasePageLocators.BASKET_BUTTON)
+        basket_button.click()
+    
     def solve_quiz_and_get_code(self):
         alert = self.browser.switch_to.alert
         x = alert.text.split(" ")[2]

@@ -1,5 +1,7 @@
 from selenium.webdriver.common.by import By
 
+from pages.basket_page import BasketPage
+from pages.locators import BasketPageLocators
 from pages.login_page import LoginPage
 from pages.main_page import MainPage
 
@@ -17,3 +19,13 @@ def test_guest_should_see_login_link(browser):
     page = MainPage(browser, link)
     page.open()
     page.should_be_login_link()
+    
+def test_guest_cant_see_product_in_basket_opened_from_main_page(browser):
+    link = "http://selenium1py.pythonanywhere.com/"
+    page = MainPage(browser, link)
+    page.open()
+    page.go_to_basket_page()
+    basket_page = BasketPage(browser, browser.current_url)
+    assert len(basket_page.get_list_of_items()) == 0, "Basket is not empty"
+    assert basket_page.is_element_present(*BasketPageLocators.EMPTY_BASKET_MESSAGE)
+    

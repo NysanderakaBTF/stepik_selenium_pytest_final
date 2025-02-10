@@ -1,9 +1,10 @@
 import time
 
 import pytest
-from pages.locators import ProductPageLocators
+from pages.locators import ProductPageLocators, BasketPageLocators
 from pages.product_page import ProductPage
 from test_main_page import LoginPage
+from pages.basket_page import BasketPage
 
 def test_user_should_see_add_to_cart_button(browser):
     link = 'https://selenium1py.pythonanywhere.com/ru/catalogue/coders-at-work_207/?promo=newYear2019'
@@ -72,3 +73,11 @@ def test_guest_can_go_to_login_page_from_product_page(browser):
     login_page.open()
     login_page.should_be_login_page()
     
+def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
+    link = "https://selenium1py.pythonanywhere.com/ru/catalogue/the-shellcoders-handbook_209/"
+    page = ProductPage(browser, link)
+    page.open()
+    page.go_to_basket_page()
+    basket_page = BasketPage(browser, browser.current_url)
+    assert len(basket_page.get_list_of_items()) == 0, "Basket is not empty"
+    assert basket_page.is_element_present(*BasketPageLocators.EMPTY_BASKET_MESSAGE)
